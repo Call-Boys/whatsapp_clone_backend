@@ -1,0 +1,42 @@
+@startuml Basic Sample
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+AddRelTag("async", $lineStyle = DashedLine())
+
+Person(person, "Usuário", "Pessoa que acessa o website whatsapp_clone")
+
+Container(spa, "SPA", "React", "Interface com a qual o usuário interage")
+
+System_Boundary(serverA, "Sistema A") {
+  Container(backendA, "Backend A", "Python", "Sistema principal que gerencia as funções")
+  ContainerDb(dbA, "Banco de Dados A", "MySQL", "Armazena as mensagens")
+}
+
+System_Boundary(serverB, "Sistema B") {
+  Container(backendB, "Backend B", "Python", "Sistema principal que gerencia as funções")
+  ContainerDb(dbB, "Banco de Dados B", "MySQL", "Armazena as mensagens")
+}
+
+System_Boundary(serverC, "Sistema C") {
+  Container(backendC, "Backend C", "Python", "Sistema principal que gerencia as funções")
+  ContainerDb(dbC, "Banco de Dados C", "MySQL", "Armazena as mensagens")
+}
+
+ContainerQueue(nginx, "Balancemanto de Carga", "NGINX", "faz o redirecionamento para um servidor")
+ContainerQueue(rabbitmq, "Stream Service", "RabbitMq", "Serviço para enviar mensagens")
+
+
+Rel(person, spa, "Usa", "http")
+Rel(spa, nginx, "Usa", "http")
+Rel(nginx, backendA, "Usa", "http")
+Rel(nginx, backendB, "Usa", "http")
+Rel(nginx, backendC, "Usa", "http")
+Rel(backendA, dbA, "Recebe os dados da mensagem", "MySQL Protocol")
+Rel(backendB, dbB, "Recebe os dados da mensagem", "MySQL Protocol")
+Rel(backendC, dbC, "Recebe os dados da mensagem", "MySQL Protocol")
+Rel(backendA, rabbitmq, "Envia e consome os dados da mensagem para", "JSON", $tags = "async")
+Rel(backendB, rabbitmq, "Envia e consome os dados da mensagem para", "JSON", $tags = "async")
+Rel(backendC, rabbitmq, "Envia e consome os dados da mensagem para", "JSON", $tags = "async")
+Rel(spa, rabbitmq, "Consome os dados da mensagem para", "JSON", $tags = "async")
+
+@enduml
